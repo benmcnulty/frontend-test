@@ -1,0 +1,42 @@
+{
+  "name": "frontend-test",
+  "version": "0.0.1",
+  "description": "Frontend Game Developer test submission for Thunderbite",
+  "main": "index.js",
+  "scripts": {
+    "lint": "jshint ./src/index.js --show-non-errors",
+    "test": "npm run lint",
+    "build:bundle": "webpack --config webpack.config.js --progress --mode=production",
+    "build:sass": "sass ./src/styles.scss ./src/styles.css",
+    "build:mini": "uglifycss ./src/styles.css > ./dist/styles.min.css",
+    "build": "npm run build:bundle && npm run build:sass && npm run build:mini",
+    "start": "npm run server",
+    "watch:webpack": "webpack --progress --watch",
+    "watch:sass": "sass --watch ./src/styles.scss ./dist/styles.css",
+    "watch": "npm run watch:webpack && npm run watch:sass",
+    "server": "webpack-dev-server --open"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benmcnulty/frontend-test.git"
+  },
+  "author": "Ben McNulty",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/benmcnulty/frontend-test/issues"
+  },
+  "homepage": "https://github.com/benmcnulty/frontend-test#readme",
+  "private": true,
+  "devDependencies": {
+    "@babel/core": "^7.7.5",
+    "@babel/preset-env": "^7.7.6",
+    "babel-loader": "^8.0.6",
+    "jshint": "^2.11.0-rc1",
+    "pixi.js": "^5.2.0",
+    "sass": "^1.23.7",
+    "uglifycss": "0.0.29",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0"
+  }
+}
