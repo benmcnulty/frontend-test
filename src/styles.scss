@@ -1,5 +1,39 @@
-$primary-color: #333;
+/* dev-tool temp-variables */
+$dev-border: 1px solid #d00;
+
+/* variables */
+$base-font-size: 10px;
+$primary-color: #c0c0c0;
+
+
+/* resets */
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+html, body {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* custom styles */
+html {
+  font-size: $base-font-size;
+}
 
 body {
   background-color: $primary-color;
+  line-height: 1;
+  font-size: 0rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+header, section, canvas {
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+  height: auto;
 }

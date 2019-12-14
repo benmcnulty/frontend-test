@@ -5,6 +5,10 @@ module.exports = {
         publicPath: 'dist'
     },
     stats: 'errors-only',
+    devServer: {
+        contentBase: './',
+        hot: true,
+    },
     module: {
         rules: [
             {

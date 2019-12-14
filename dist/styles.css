@@ -1,19 +1,15 @@
 /* dev-tool temp-variables */
 /* variables */
 /* resets */
-html {
-  box-sizing: border-box;
-  font-size: 16px;
-}
-
 *, *:before, *:after {
   box-sizing: inherit;
 }
 
-body {
+html, body {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-weight: normal;
+  height: 100%;
 }
 
 /* custom styles */
@@ -23,18 +19,17 @@ html {
 
 body {
   background-color: #c0c0c0;
-  font-size: 0rem;
   line-height: 1;
+  font-size: 0rem;
+  max-width: 100%;
+  overflow: hidden;
 }
 
-canvas {
+header, section, canvas {
+  margin: 0;
+  padding: 0;
   max-width: 100%;
   height: auto;
-}
-
-/* dev-tool temp-styles */
-canvas {
-  border: 1px solid #d00;
 }
 
 /*# sourceMappingURL=styles.css.map */
