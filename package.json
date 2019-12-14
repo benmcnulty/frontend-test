@@ -6,15 +6,19 @@
   "scripts": {
     "lint": "jshint ./src/index.js --show-non-errors",
     "test": "npm run lint",
-    "build:bundle": "webpack --config webpack.config.js --progress --mode=production",
+    "bundle:dev": "webpack --config webpack.config.js --progress --mode=development",
+    "bundle:prod": "webpack --config webpack.config.js --progress --mode=production",
     "build:sass": "sass ./src/styles.scss ./src/styles.css",
     "build:mini": "uglifycss ./src/styles.css > ./dist/styles.min.css",
-    "build": "npm run build:bundle && npm run build:sass && npm run build:mini",
-    "start": "npm run server",
+    "build:dev": "npm run bundle:dev && npm run build:sass && npm run build:mini",
+    "build": "npm run --quiet bundle:prod && npm run build:sass && npm run build:mini",
+    "start": "npm run --silent server:prod",
+    "start:dev": "npm run build:dev && npm run server:dev",
     "watch:webpack": "webpack --progress --watch",
     "watch:sass": "sass --watch ./src/styles.scss ./dist/styles.css",
     "watch": "npm run watch:webpack && npm run watch:sass",
-    "server": "webpack-dev-server --open"
+    "server:dev": "webpack-dev-server --open --port 8888",
+    "server:prod": "npx http-server -o"
   },
   "repository": {
     "type": "git",
@@ -38,5 +42,8 @@
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10",
     "webpack-dev-server": "^3.9.0"
+  },
+  "dependencies": {
+    "http-server": "^0.12.0"
   }
 }

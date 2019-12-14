@@ -1,10 +1,10 @@
 module.exports = {
-    mode: 'development',
     entry: './src/index.js',
     output: {
         filename: 'bundle.js',
         publicPath: 'dist'
     },
+    stats: 'errors-only',
     module: {
         rules: [
             {
