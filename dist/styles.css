@@ -23,6 +23,8 @@ body {
   font-size: 0rem;
   max-width: 100%;
   overflow: hidden;
+  background: #3c164f;
+  background: linear-gradient(250deg, #3c164f 0%, #7e358d 33%, #0b4891 67%, #0c2a8f 100%);
 }
 
 header, section, canvas {

@@ -18,7 +18,8 @@
     "watch:sass": "sass --watch ./src/styles.scss ./dist/styles.css",
     "watch": "npm run watch:webpack && npm run watch:sass",
     "server:dev": "webpack-dev-server --open --port 8888",
-    "server:prod": "npx http-server -o"
+    "server:prod": "npx http-server -o",
+    "stats": "npx webpack --mode production --profile --json > stats.json"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
     "@babel/preset-env": "^7.7.6",
     "babel-loader": "^8.0.6",
     "jshint": "^2.11.0-rc1",
+    "pixi-inspector": "^1.0.7",
     "pixi.js": "^5.2.0",
     "sass": "^1.23.7",
     "uglifycss": "0.0.29",
