@@ -1,1 +1,1 @@
-html{box-sizing:border-box;font-size:16px}*,*:before,*:after{box-sizing:inherit}body{margin:0;padding:0;font-weight:normal}html{font-size:10px}body{background-color:silver;font-size:0;line-height:1}canvas{max-width:100%;height:auto}canvas{border:1px solid #d00}
+*,*:before,*:after{box-sizing:inherit}html,body{box-sizing:border-box;margin:0;padding:0;height:100%}html{font-size:10px}body{background-color:silver;line-height:1;font-size:0;max-width:100%;overflow:hidden}header,section,canvas{margin:0;padding:0;max-width:100%;height:auto}
