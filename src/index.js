@@ -159,6 +159,8 @@ function spriteSetup() {
     markerSprite.height = wheelWidth*0.3;
     markerSprite.rotation = 0.75;
 
+    
+
     let buttonOffset = wheelWidth/-2.1;
     buttonSprite.anchor.set(0.5);
     buttonSprite.position.set(0,buttonOffset)
@@ -174,6 +176,22 @@ function spriteSetup() {
             return;
         }
     });
+
+    // Responsiveness
+    if (innerWidth > 1200 && innerHeight > 900) {
+        wheelSprite.position.set((-0.25*innerHeight),(wheelSprite.width*0.125));
+        markerSprite.position.set(markerOffsetX-(0.25*innerHeight), markerOffsetY);
+        buttonSprite.position.set((0.33*innerHeight),0);
+    }
+
+    if (innerWidth > 1600 && innerHeight > 900) {
+        keepWheelSquare(wheelSprite);
+        let xPos = -1.2*wheelSprite.width*0.5;
+        let yPos = innerHeight*0;
+        wheelSprite.position.set(xPos,yPos);
+        markerSprite.position.set(markerOffsetX+(xPos), markerOffsetY-(wheelSprite.width*0.125));
+        buttonSprite.position.set((0.33*innerHeight),0);
+    }
 
     // attach
     spinnerBox.addChild(wheelSprite);
@@ -250,9 +268,14 @@ function keepWheelSquare(obj) {
     if (innerWidth < (innerHeight*scaler)) {
         obj.width = innerWidth*0.9;
         obj.height = innerWidth*0.9;
-    } else {
+    } else if (innerWidth > (innerHeight*scaler)) {
         obj.width = innerHeight*scaler;
         obj.height = innerHeight*scaler;
+    }
+
+    if (innerWidth > 1600) {
+        obj.width = 1.25*innerHeight*scaler;
+        obj.height = 1.25*innerHeight*scaler;
     }
 }
 
