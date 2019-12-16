@@ -1,66 +1,209 @@
 import * as PIXI from 'pixi.js';
-/* Aliases */
 window.PIXI = PIXI;
-let Application = PIXI.Application,
-    Container = PIXI.Container,
-    Sprite = PIXI.Sprite;
+const canvasDOM = document.getElementById("viewerCanvas");
 
-/* Build Canvas */
-const showdownCanvas = new Application({
-    view: showdownAnimation,
-    resolution: window.devicePixelRatio || 1,
-    autoDensity: true,
-    antialias: true,
-    transparent: false,
-    interactiveChildren: false
-});
+let density = window.devicePixelRatio || 1;
+let innerWidth = window.innerWidth;
+let innerHeight = window.innerHeight;
 
-const spinnerCanvas = new Application({
-    view: spinnerAnimation,
-    resolution: window.devicePixelRatio || 1,
+let first = true;
+
+const app = new PIXI.Application({
+    view: viewerCanvas,
+    resolution: density,
     autoDensity: true,
     antialias: true,
     transparent: true,
-    interactive: true,
-    buttonMode: true
+    width: innerWidth,
+    height: innerHeight
 });
+app.renderer.autoResize = true;
+app.renderer.resize(innerWidth, innerHeight);
 
-/* Responsive Canvas */
-let width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-let height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-let totalWidth = width;
-let totalHeight = height;
-let showdownHeight = Math.round(totalHeight*0.4);
-let spinnerHeight = (totalHeight-showdownHeight);
+app.loader.add([
+    {name: 'headerBack', url: 'src/images/header.png'},
+    {name: 'showdownOff', url: 'src/images/showdown-off.png'},
+    {name: 'spinnerButton', url: './src/images/btn-spin.png'},
+    {name: 'spinnerWheel', url: './src/images/wheel.png'},
+    {name: 'spinnerMarker', url: './src/images/marker.png'}
+]).on("progress", loadProgressHandler).load(spriteSetup);
 
-function sizeCheck() {
-    let currentWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-    let currentHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+const stage = new PIXI.Container();
+stage.width = app.renderer.width;
+stage.height = app.renderer.height;
+app.stage.addChild(stage);
 
-    if (currentWidth != width || currentHeight != height) {
-        canvasResizer(currentWidth, currentHeight);
+// const holder = app.stage.addChild(new PIXI.Container());
+// centerThis(holder);
+
+// const showdownContainer = new PIXI.Container();
+// centerThis(showdownContainer);
+
+// const backgroundContainer = new PIXI.Container();
+// centerThis(backgroundContainer);
+
+function spriteSetup() {
+    // declare
+    const headerBox = new PIXI.Container();
+    const headerAnimationBox = new PIXI.Container();
+    
+    const headerSprite = new PIXI.Sprite(app.loader.resources.headerBack.texture);
+    const showdownOffSprite = new PIXI.Sprite(app.loader.resources.showdownOff.texture);
+    const spinnerBox = new PIXI.Container();
+    const wheelSprite = new PIXI.Sprite(app.loader.resources.spinnerWheel.texture);
+    const markerSprite = new PIXI.Sprite(app.loader.resources.spinnerMarker.texture);
+    const buttonSprite = new PIXI.Sprite(app.loader.resources.spinnerButton.texture);
+
+    // modify
+    headerBox.width = innerWidth;
+    headerBox.height = innerHeight*0.4;
+    headerBox.pivot.x = (innerWidth)/2;
+    headerBox.pivot.y = (innerHeight*0.4)/2;
+    moveHeaderToTop(headerBox);
+    
+    headerSprite.anchor.set(0.5);
+    headerSprite.width = innerWidth*1.2;
+    headerSprite.height = innerHeight*0.4;
+    centerAtMiddle(headerSprite);
+
+    centerAtMiddle(headerAnimationBox);
+
+    showdownOffSprite.anchor.set(0.5);
+    showdownOffSprite.position.set(0,0);
+    keepLightsScaled(showdownOffSprite);
+
+    spinnerBox.width = innerWidth;
+    spinnerBox.height = innerHeight*0.6;
+    spinnerBox.pivot.x = (innerWidth/2);
+    spinnerBox.pivot.y = (innerHeight*0.6)/2;
+    moveSpinnerToBottom(spinnerBox);
+
+    wheelSprite.anchor.set(0.5);
+    keepWheelSquare(wheelSprite);
+    wheelSprite.position.set(0,(wheelSprite.width*0.1));
+
+    app.ticker.add((delta) => {
+        if (spinRequested || spinTime) {
+            wheelSprite.rotation += 0.02 * delta;
+        } else {
+            return;
+        }
+    });
+
+    let wheelWidth = wheelSprite.width;
+    let markerOffsetX = wheelWidth/2.8;
+    let markerOffsetY = (wheelWidth/-2.8)+(wheelSprite.width*0.1);
+    markerSprite.anchor.set(0.5);
+    markerSprite.position.set(markerOffsetX, markerOffsetY)
+    markerSprite.width = wheelWidth*0.15;
+    markerSprite.height = wheelWidth*0.3;
+    markerSprite.rotation = 0.75;
+
+    let buttonOffset = wheelWidth/-1.75;
+    buttonSprite.anchor.set(0.5);
+    buttonSprite.position.set(0,buttonOffset)
+    buttonSprite.width = wheelWidth;
+    buttonSprite.height = wheelWidth*0.2;
+    buttonSprite.interactive = true;
+    buttonSprite.buttonMode = true;
+    buttonSprite.on(touchType, (event) => {
+        if (!spinRequested) {
+            spinRequested = true;
+            setData();
+        } else {
+            return;
+        }
+    });
+
+    spinnerBox.addChild(wheelSprite);
+    spinnerBox.addChild(markerSprite);
+    spinnerBox.addChild(buttonSprite);
+
+    headerAnimationBox.addChild(showdownOffSprite);
+
+    headerBox.addChild(headerSprite);
+    headerBox.addChild(headerAnimationBox);
+    
+    if (!first) {
+        stage.removeChildren();
+    }
+    first = false;
+
+    stage.addChild(headerBox);
+    stage.addChild(spinnerBox);
+}
+
+function fillWindow() {
+    innerWidth = window.innerWidth;
+    innerHeight = window.innerHeight;
+    canvasDOM.style.width = innerWidth;
+    canvasDOM.style.height = innerHeight;
+    app.view.style.width = innerWidth;
+    app.view.style.height = innerHeight;
+    app.view.width = innerWidth;
+    app.view.height = innerHeight;
+    app.renderer.resize(innerWidth, innerHeight);
+};
+
+function consolidatedScaler () {
+    fillWindow();
+    spriteSetup();
+}
+
+function centerAtMiddle(obj) {
+    let centerWidth = (innerWidth)/2;
+    let centerHeight = (innerHeight)/2;
+    obj.position.set(centerWidth,centerHeight);
+}
+
+function moveHeaderToTop(obj) {
+    let centerWidth = (innerWidth)/2;
+    let vertOffset = (innerHeight*0.4)/4;
+    let vertPos = 0-vertOffset;
+    obj.position.set(centerWidth, vertPos);
+}
+
+function moveSpinnerToBottom(obj) {
+    let centerWidth = innerWidth;
+    let vertPos = innerHeight;
+    obj.position.set(centerWidth, vertPos);
+}
+
+function keepWheelSquare(obj) {
+    let scaler = 0.5;
+    if (innerWidth < (innerHeight*scaler)) {
+        obj.width = innerWidth*0.9;
+        obj.height = innerWidth*0.9;
+    } else {
+        obj.width = innerHeight*scaler;
+        obj.height = innerHeight*scaler;
     }
 }
 
-function canvasResizer(newWidth, newHeight) {    
-    showdownHeight = Math.round(newHeight*0.4);
-    spinnerHeight = (newHeight-showdownHeight);
-    showdownCanvas.stage.position.x = 0;
-    showdownCanvas.stage.position.y = 0;
-    showdownCanvas.stage.width = newWidth;
-    showdownCanvas.stage.height = showdownHeight;
-    showdownCanvas.renderer.resize(newWidth, showdownHeight);
-
-    spinnerCanvas.stage.position.x = 0;
-    spinnerCanvas.stage.position.y = 0;
-    spinnerCanvas.stage.width = newWidth;
-    spinnerCanvas.stage.height = spinnerHeight;
-    spinnerCanvas.renderer.resize(newWidth, spinnerHeight);
+function keepLightsScaled(obj) {
+    let scaler = 0.5;
+    if (innerWidth < (innerHeight*0.75)) {
+        obj.width = innerWidth*0.9;
+        obj.height = (obj.width)*scaler;
+    } else if (innerWidth < (innerHeight*1.5)) {
+        obj.width = innerWidth*0.5;
+        obj.height = (obj.width)*0.5;
+    } else if (innerWidth > (innerHeight*2)) {
+        obj.height = innerHeight*0.35;
+        obj.width = obj.height*2;
+    } else {
+        obj.width = innerWidth*0.3;
+        obj.height = (obj.width)*0.5;
+    }
 }
 
-window.addEventListener('load', sizeCheck);
-window.addEventListener('resize', sizeCheck);
-window.addEventListener('orientationchange', sizeCheck);
+function loadProgressHandler(loader, resource) {
+    console.log("file: " + resource.name);
+}
+
+window.addEventListener('DOMContentLoaded', consolidatedScaler);
+window.addEventListener('orientationChange', consolidatedScaler);
+window.addEventListener('resize', consolidatedScaler);
 
 /* Get JSON Data */
 let jsonResponse = {};
@@ -73,7 +216,6 @@ function showData() {
         let spinfo = jsonResponse.POSITION;
         console.warn(spinfo);
         setTimeout(function(){ spinTime = false; }, 5000);
-        console.warn(spinnerCanvas.loader.resources.spinnerButton.texture);
     }
 };
 
@@ -104,121 +246,3 @@ if ('ontouchstart' in window) {
     touchType = "click";
     message = "clicked";
 }
-
-/* Pixi Loaders */
-showdownCanvas.loader.add([
-    {name: 'headerBack', url: './src/images/header.png'},
-    {name: 'showdownOff', url: './src/images/showdown-off.png'}
-]).on("progress", loadProgressHandler).load(showdownSetup);
-
-spinnerCanvas.loader.add([
-    {name: 'spinnerButton', url: './src/images/btn-spin.png'},
-    {name: 'spinnerWheel', url: './src/images/wheel.png'},
-    {name: 'spinnerMarker', url: './src/images/marker.png'}
-]).on("progress", loadProgressHandler).load(spinnerSetup);
-
-function loadProgressHandler( loader, resource ) {
-    console.log("file: " + resource.name);
-}
-
-function showdownSetup() {
-    showdownHeight = Math.round(totalHeight*0.4);
-    let showdownContainerWidth = totalWidth;
-    let showdownCenter = showdownContainerWidth/2;
-    let showdownMiddle = showdownHeight/2;
-
-    showdownCanvas.stage.position.x = (showdownCenter/2);
-    showdownCanvas.stage.position.y = 0;
-    showdownCanvas.stage.width = showdownContainerWidth;
-    showdownCanvas.stage.height = showdownHeight;
-
-    const showdownContainer = new Container();
-    showdownContainer.position.set(showdownCenter, showdownMiddle);
-
-    const headerBackSprite = 
-    new Sprite(showdownCanvas.loader.resources.headerBack.texture);
-    headerBackSprite.anchor.set(0.5);
-    headerBackSprite.width = width;
-    headerBackSprite.height = showdownHeight;
-    headerBackSprite.position.set(0,0);
-
-    const animationContainer = new Container();
-    animationContainer.position.set(0,0);
-
-    const showdownOffSprite = 
-    new Sprite(showdownCanvas.loader.resources.showdownOff.texture);
-    showdownOffSprite.anchor.set(0.5);
-    showdownOffSprite.width = showdownContainerWidth*0.8;
-    showdownOffSprite.height = showdownHeight*0.8;
-    showdownOffSprite.position.set(0,0);
-
-    animationContainer.addChild(showdownOffSprite);
-    
-    showdownContainer.addChild(headerBackSprite);
-    showdownContainer.addChild(animationContainer);
-    showdownCanvas.stage.addChild(showdownContainer);
-    canvasResizer(totalWidth, totalHeight);
-};
-
-function spinnerSetup() {
-    spinnerHeight = (height-showdownHeight);
-
-    let spinnerContainerWidth = totalWidth;
-    let spinnerCenter = (spinnerContainerWidth/2);
-    let spinnerMiddle = (spinnerHeight/2);
-
-    const spinnerContainer = new Container();
-    spinnerContainer.position.set(spinnerCenter,spinnerMiddle);
-    spinnerContainer.scale.set(1,1);
-    
-    const wheelSprite = 
-    new Sprite(spinnerCanvas.loader.resources.spinnerWheel.texture);
-    wheelSprite.anchor.set(0.5);
-    wheelSprite.width = (wheelSprite.width)*0.6;
-    wheelSprite.height = wheelSprite.width;
-    wheelSprite.pivot.x = 0;
-    wheelSprite.pivot.y = 0;
-    wheelSprite.position.x = 0;
-    wheelSprite.position.y = (wheelSprite.width)*0.2;
-    spinnerCanvas.ticker.add((delta) => {
-        if (spinRequested || spinTime) {
-            wheelSprite.rotation += 0.02 * delta;
-        } else {
-            return;
-        }
-    });
-
-    const buttonSprite = 
-    new Sprite(spinnerCanvas.loader.resources.spinnerButton.texture);
-    let halfWidth = (buttonSprite.width/2);
-    buttonSprite.anchor.set(0.5);
-    buttonSprite.width = buttonSprite.width;
-    buttonSprite.height = (buttonSprite.width*0.2);
-    buttonSprite.interactive = true;
-    buttonSprite.buttonMode = true;
-    buttonSprite.position.x = 10;
-    buttonSprite.position.y = -150;
-    buttonSprite.on(touchType, (event) => {
-        if (!spinRequested) {
-            spinRequested = true;
-            setData();
-        } else {
-            return;
-        }
-    });
-
-    const markerSprite = 
-    new Sprite(spinnerCanvas.loader.resources.spinnerMarker.texture);
-    markerSprite.anchor.set(0.5);
-    markerSprite.pivot.x = 0;
-    markerSprite.pivot.y = 0;
-    markerSprite.position.x = 100;
-    markerSprite.position.y = -90;
-    markerSprite.rotation = 0.5;
-    
-    spinnerContainer.addChild(wheelSprite);
-    spinnerContainer.addChild(buttonSprite);
-    spinnerContainer.addChild(markerSprite);
-    spinnerCanvas.stage.addChild(spinnerContainer);
-    canvasResizer(totalWidth, totalHeight);
-};
