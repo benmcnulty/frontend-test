@@ -25,7 +25,20 @@ app.loader.add([
     {name: 'showdownOff', url: 'src/images/showdown-off.png'},
     {name: 'spinnerButton', url: './src/images/btn-spin.png'},
     {name: 'spinnerWheel', url: './src/images/wheel.png'},
-    {name: 'spinnerMarker', url: './src/images/marker.png'}
+    {name: 'spinnerMarker', url: './src/images/marker.png'},
+    {name: 'boltOff', url: './src/images/bolt-off@2x.png'},
+    {name: 'boltOn', url: './src/images/bolt@2x.png'},
+    {name: 'mustDrop', url: './src/images/must_drop.png'},
+    {name: 'slots', url: './src/images/slots@2x.png'},
+    {name: 'vegas', url: './src/images/vegas@2x.png'},
+    {name: 's1Let', url: './src/images/s@2x.png'},
+    {name: 'hLet', url: './src/images/h@2x.png'},
+    {name: 'o1Let', url: './src/images/o-1@2x.png'},
+    {name: 'w1Let', url: './src/images/w-1@2x.png'},
+    {name: 'dLet', url: './src/images/d@2x.png'},
+    {name: 'o2Let', url: './src/images/o-2@2x.png'},
+    {name: 'w2Let', url: './src/images/w-2@2x.png'},
+    {name: 'nLet', url: './src/images/n@2x.png'}
 ]).on("progress", loadProgressHandler).load(spriteSetup);
 
 const stage = new PIXI.Container();
@@ -54,6 +67,10 @@ function spriteSetup() {
     const markerSprite = new PIXI.Sprite(app.loader.resources.spinnerMarker.texture);
     const buttonSprite = new PIXI.Sprite(app.loader.resources.spinnerButton.texture);
 
+    const mustDropSprite = new PIXI.Sprite(app.loader.resources.mustDrop.texture);
+    const vegasSprite = new PIXI.Sprite(app.loader.resources.vegas.texture);
+    const slotsSprite = new PIXI.Sprite(app.loader.resources.slots.texture);
+
     // modify
     headerBox.width = innerWidth;
     headerBox.height = innerHeight*0.4;
@@ -69,8 +86,16 @@ function spriteSetup() {
     centerAtMiddle(headerAnimationBox);
 
     showdownOffSprite.anchor.set(0.5);
-    showdownOffSprite.position.set(0,0);
     keepLightsScaled(showdownOffSprite);
+
+    vegasSprite.anchor.set(0.5);
+    alignToSign(vegasSprite, showdownOffSprite, -0.4, -0.33, 1);
+
+    slotsSprite.anchor.set(0.5);
+    alignToSign(slotsSprite, showdownOffSprite, 0.5, -0.33, 1);
+
+    mustDropSprite.anchor.set(0.5);
+    alignToSign(mustDropSprite, showdownOffSprite, 0, 0.4, 0.65);
 
     spinnerBox.width = innerWidth;
     spinnerBox.height = innerHeight*0.6;
@@ -99,7 +124,7 @@ function spriteSetup() {
     markerSprite.height = wheelWidth*0.3;
     markerSprite.rotation = 0.75;
 
-    let buttonOffset = wheelWidth/-1.75;
+    let buttonOffset = wheelWidth/-2;
     buttonSprite.anchor.set(0.5);
     buttonSprite.position.set(0,buttonOffset)
     buttonSprite.width = wheelWidth;
@@ -115,11 +140,15 @@ function spriteSetup() {
         }
     });
 
+    // attach
     spinnerBox.addChild(wheelSprite);
     spinnerBox.addChild(markerSprite);
     spinnerBox.addChild(buttonSprite);
 
     headerAnimationBox.addChild(showdownOffSprite);
+    headerAnimationBox.addChild(mustDropSprite);
+    headerAnimationBox.addChild(slotsSprite);
+    headerAnimationBox.addChild(vegasSprite);
 
     headerBox.addChild(headerSprite);
     headerBox.addChild(headerAnimationBox);
@@ -195,6 +224,20 @@ function keepLightsScaled(obj) {
         obj.width = innerWidth*0.3;
         obj.height = (obj.width)*0.5;
     }
+    obj.position.set(0,0);
+}
+
+function alignToSign(obj, sign, xFactor, yFactor, baseFactor) {
+    let baseScaler = baseFactor;
+    let baseScaleX = sign.scale.x*baseScaler;
+    let baseScaleY = sign.scale.y*baseScaler;
+
+    obj.scale.set(baseScaleX, baseScaleY);
+
+    let xOffset = sign.height * xFactor;
+    let yOffset = sign.height * yFactor;
+        
+    obj.position.set(xOffset, yOffset);
 }
 
 function loadProgressHandler(loader, resource) {
