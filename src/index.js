@@ -31,7 +31,7 @@ app.loader.add([
     {name: 'mustDrop', url: './src/images/must_drop.png'},
     {name: 'slots', url: './src/images/slots@2x.png'},
     {name: 'vegas', url: './src/images/vegas@2x.png'},
-    {name: 's1Let', url: './src/images/s@2x.png'},
+    {name: 'sLet', url: './src/images/s@2x.png'},
     {name: 'hLet', url: './src/images/h@2x.png'},
     {name: 'o1Let', url: './src/images/o-1@2x.png'},
     {name: 'w1Let', url: './src/images/w-1@2x.png'},
@@ -70,6 +70,18 @@ function spriteSetup() {
     const mustDropSprite = new PIXI.Sprite(app.loader.resources.mustDrop.texture);
     const vegasSprite = new PIXI.Sprite(app.loader.resources.vegas.texture);
     const slotsSprite = new PIXI.Sprite(app.loader.resources.slots.texture);
+    const boltOnSprite = new PIXI.Sprite(app.loader.resources.boltOn.texture);
+    const boltOffSprite = new PIXI.Sprite(app.loader.resources.boltOff.texture);
+
+    const sLetSprite = new PIXI.Sprite(app.loader.resources.sLet.texture);
+    const hLetSprite = new PIXI.Sprite(app.loader.resources.hLet.texture);
+    const o1LetSprite = new PIXI.Sprite(app.loader.resources.o1Let.texture);
+    const w1LetSprite = new PIXI.Sprite(app.loader.resources.w1Let.texture);
+
+    const dLetSprite = new PIXI.Sprite(app.loader.resources.dLet.texture);
+    const o2LetSprite = new PIXI.Sprite(app.loader.resources.o2Let.texture);
+    const w2LetSprite = new PIXI.Sprite(app.loader.resources.w2Let.texture);
+    const nLetSprite = new PIXI.Sprite(app.loader.resources.nLet.texture);
 
     // modify
     headerBox.width = innerWidth;
@@ -97,6 +109,29 @@ function spriteSetup() {
     mustDropSprite.anchor.set(0.5);
     alignToSign(mustDropSprite, showdownOffSprite, 0, 0.4, 0.65);
 
+    boltOffSprite.anchor.set(0.5);
+    alignToSign(boltOffSprite, showdownOffSprite, 0.05, -0.34, 0.75);
+    boltOnSprite.anchor.set(0.5);
+    alignToSign(boltOnSprite, showdownOffSprite, 0.05, -0.355, 1);
+
+    sLetSprite.anchor.set(0.5);
+    alignToSign(sLetSprite, showdownOffSprite, -0.85, 0.1, 1);
+    hLetSprite.anchor.set(0.5);
+    alignToSign(hLetSprite, showdownOffSprite, -0.6, 0.1, 1);
+    o1LetSprite.anchor.set(0.5);
+    alignToSign(o1LetSprite, showdownOffSprite, -0.41, 0.095, 1);
+    w1LetSprite.anchor.set(0.5);
+    alignToSign(w1LetSprite, showdownOffSprite, -0.135, 0.058, 1);
+
+    dLetSprite.anchor.set(0.5);
+    alignToSign(dLetSprite, showdownOffSprite, 0.152, 0.03, 1);
+    o2LetSprite.anchor.set(0.5);
+    alignToSign(o2LetSprite, showdownOffSprite, 0.365, 0.045, 1);
+    w2LetSprite.anchor.set(0.5);
+    alignToSign(w2LetSprite, showdownOffSprite, 0.575, 0.09, 1);
+    nLetSprite.anchor.set(0.5);
+    alignToSign(nLetSprite, showdownOffSprite, 0.85, 0.1, 1);
+
     spinnerBox.width = innerWidth;
     spinnerBox.height = innerHeight*0.6;
     spinnerBox.pivot.x = (innerWidth/2);
@@ -105,7 +140,7 @@ function spriteSetup() {
 
     wheelSprite.anchor.set(0.5);
     keepWheelSquare(wheelSprite);
-    wheelSprite.position.set(0,(wheelSprite.width*0.1));
+    wheelSprite.position.set(0,(wheelSprite.width*0.125));
 
     app.ticker.add((delta) => {
         if (spinRequested || spinTime) {
@@ -124,11 +159,11 @@ function spriteSetup() {
     markerSprite.height = wheelWidth*0.3;
     markerSprite.rotation = 0.75;
 
-    let buttonOffset = wheelWidth/-2;
+    let buttonOffset = wheelWidth/-2.1;
     buttonSprite.anchor.set(0.5);
     buttonSprite.position.set(0,buttonOffset)
-    buttonSprite.width = wheelWidth;
-    buttonSprite.height = wheelWidth*0.2;
+    buttonSprite.width = wheelWidth*0.9;
+    buttonSprite.height = buttonSprite.width*0.2;
     buttonSprite.interactive = true;
     buttonSprite.buttonMode = true;
     buttonSprite.on(touchType, (event) => {
@@ -149,6 +184,18 @@ function spriteSetup() {
     headerAnimationBox.addChild(mustDropSprite);
     headerAnimationBox.addChild(slotsSprite);
     headerAnimationBox.addChild(vegasSprite);
+    headerAnimationBox.addChild(boltOffSprite);
+    headerAnimationBox.addChild(boltOnSprite);
+
+    headerAnimationBox.addChild(sLetSprite);
+    headerAnimationBox.addChild(hLetSprite);
+    headerAnimationBox.addChild(o1LetSprite);
+    headerAnimationBox.addChild(w1LetSprite);
+
+    headerAnimationBox.addChild(dLetSprite);
+    headerAnimationBox.addChild(o2LetSprite);
+    headerAnimationBox.addChild(w2LetSprite);
+    headerAnimationBox.addChild(nLetSprite);
 
     headerBox.addChild(headerSprite);
     headerBox.addChild(headerAnimationBox);
@@ -194,7 +241,7 @@ function moveHeaderToTop(obj) {
 
 function moveSpinnerToBottom(obj) {
     let centerWidth = innerWidth;
-    let vertPos = innerHeight;
+    let vertPos = innerHeight*0.975;
     obj.position.set(centerWidth, vertPos);
 }
 
@@ -211,6 +258,7 @@ function keepWheelSquare(obj) {
 
 function keepLightsScaled(obj) {
     let scaler = 0.5;
+    obj.position.set(0,0);
     if (innerWidth < (innerHeight*0.75)) {
         obj.width = innerWidth*0.9;
         obj.height = (obj.width)*scaler;
