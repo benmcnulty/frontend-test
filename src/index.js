@@ -22,18 +22,6 @@ let stradle = false;
 let passed = false;
 let passedTwice = false;
 
-/* Handle Input */
-let touchType;
-if ('ontouchstart' in window) {
-    touchType = "touchstart";
-} else {
-    touchType = "click";
-}
-
-window.addEventListener('DOMContentLoaded', consolidatedScaler);
-window.addEventListener('orientationChange', consolidatedScaler);
-window.addEventListener('resize', consolidatedScaler);
-
 const app = new PIXI.Application({
     view: viewerCanvas,
     resolution: density,
@@ -43,6 +31,7 @@ const app = new PIXI.Application({
     width: innerWidth,
     height: innerHeight
 });
+
 app.renderer.autoResize = true;
 app.renderer.resize(innerWidth, innerHeight);
 
@@ -51,6 +40,8 @@ app.loader.add([
     {name: 'showdownOff', url: 'src/images/showdown-off.png'},
     {name: 'spinnerButton', url: './src/images/btn-spin.png'},
     {name: 'spinnerWheel', url: './src/images/wheel.png'},
+    {name: 'btnShadow', url: './src/images/btn-shadow.png'},
+    {name: 'spinnerShadow', url: './src/images/wheel-shadow.png'},
     {name: 'spinnerMarker', url: './src/images/marker.png'},
     {name: 'boltOff', url: './src/images/bolt-off@2x.png'},
     {name: 'boltOn', url: './src/images/bolt@2x.png'},
@@ -85,8 +76,10 @@ function spriteSetup() {
     const showdownOffSprite = new PIXI.Sprite(app.loader.resources.showdownOff.texture);
     const spinnerBox = new PIXI.Container();
     const wheelSprite = new PIXI.Sprite(app.loader.resources.spinnerWheel.texture);
+    const wheelShadow = new PIXI.Sprite(app.loader.resources.spinnerShadow.texture);
     const markerSprite = new PIXI.Sprite(app.loader.resources.spinnerMarker.texture);
     const buttonSprite = new PIXI.Sprite(app.loader.resources.spinnerButton.texture);
+    const buttonShadow = new PIXI.Sprite(app.loader.resources.btnShadow.texture);
 
     const mustDropSprite = new PIXI.Sprite(app.loader.resources.mustDrop.texture);
     const vegasSprite = new PIXI.Sprite(app.loader.resources.vegas.texture);
@@ -112,46 +105,83 @@ function spriteSetup() {
     moveHeaderToTop(headerBox);
     
     headerSprite.anchor.set(0.5);
-    headerSprite.width = innerWidth*1.2;
+    if (innerWidth < 600) {
+        headerSprite.width = innerWidth*1.5;
+    } else if (innerWidth < 900) {
+        headerSprite.width = innerWidth*1.2;
+    } else {
+        headerSprite.width = innerWidth;
+    }
+    
     headerSprite.height = innerHeight*0.4;
-    centerAtMiddle(headerSprite);
+    let currentCenterX = (innerWidth)/2;
+    let currentCenterY = (innerHeight)/2;
+    headerSprite.position.set(currentCenterX,currentCenterY);
 
     centerAtMiddle(headerAnimationBox);
 
     showdownOffSprite.anchor.set(0.5);
     keepLightsScaled(showdownOffSprite);
 
-    vegasSprite.anchor.set(0.5);
-    alignToSign(vegasSprite, showdownOffSprite, -0.4, -0.33, 1);
 
-    slotsSprite.anchor.set(0.5);
-    alignToSign(slotsSprite, showdownOffSprite, 0.5, -0.33, 1);
-
-    mustDropSprite.anchor.set(0.5);
-    alignToSign(mustDropSprite, showdownOffSprite, 0, 0.4, 0.65);
 
     boltOffSprite.anchor.set(0.5);
+    hideThis(boltOffSprite);
     alignToSign(boltOffSprite, showdownOffSprite, 0.05, -0.34, 0.75);
+
     boltOnSprite.anchor.set(0.5);
-    alignToSign(boltOnSprite, showdownOffSprite, 0.05, -0.355, 1);
+    hideThis(boltOnSprite);
+    alignToSign(boltOnSprite, showdownOffSprite, 0.05, -0.356, 1);
+
+    vegasSprite.anchor.set(0.5);
+    hideThis(vegasSprite);
+    alignToSign(vegasSprite, showdownOffSprite, -0.49, -0.33, 1);
+
+    slotsSprite.anchor.set(0.5);
+    hideThis(slotsSprite);
+    alignToSign(slotsSprite, showdownOffSprite, 0.59, -0.33, 1);
+
+
 
     sLetSprite.anchor.set(0.5);
-    alignToSign(sLetSprite, showdownOffSprite, -0.85, 0.1, 1);
+    hideThis(sLetSprite);
+    alignToSign(sLetSprite, showdownOffSprite, -1.01, 0.1, 1);
+
     hLetSprite.anchor.set(0.5);
-    alignToSign(hLetSprite, showdownOffSprite, -0.6, 0.1, 1);
+    hideThis(hLetSprite);
+    alignToSign(hLetSprite, showdownOffSprite, -0.7, 0.1, 1);
+
     o1LetSprite.anchor.set(0.5);
-    alignToSign(o1LetSprite, showdownOffSprite, -0.41, 0.095, 1);
+    hideThis(o1LetSprite);
+    alignToSign(o1LetSprite, showdownOffSprite, -0.48, 0.095, 1);
+
     w1LetSprite.anchor.set(0.5);
-    alignToSign(w1LetSprite, showdownOffSprite, -0.135, 0.058, 1);
+    hideThis(w1LetSprite);
+    alignToSign(w1LetSprite, showdownOffSprite, -0.155, 0.058, 1);
 
     dLetSprite.anchor.set(0.5);
-    alignToSign(dLetSprite, showdownOffSprite, 0.152, 0.03, 1);
+    hideThis(dLetSprite);
+    alignToSign(dLetSprite, showdownOffSprite, 0.18, 0.035, 1);
+
     o2LetSprite.anchor.set(0.5);
-    alignToSign(o2LetSprite, showdownOffSprite, 0.365, 0.045, 1);
+    hideThis(o2LetSprite);
+    alignToSign(o2LetSprite, showdownOffSprite, 0.43, 0.048, 1);
+
     w2LetSprite.anchor.set(0.5);
-    alignToSign(w2LetSprite, showdownOffSprite, 0.575, 0.09, 1);
+    hideThis(w2LetSprite);
+    alignToSign(w2LetSprite, showdownOffSprite, 0.68, 0.094, 1);
+
     nLetSprite.anchor.set(0.5);
-    alignToSign(nLetSprite, showdownOffSprite, 0.85, 0.1, 1);
+    hideThis(nLetSprite);
+    alignToSign(nLetSprite, showdownOffSprite, 1.01, 0.1, 1);
+
+
+
+    mustDropSprite.anchor.set(0.5);
+    hideThis(mustDropSprite);
+    alignToSign(mustDropSprite, showdownOffSprite, 0, 0.4, 0.65);
+
+
 
     spinnerBox.width = innerWidth;
     spinnerBox.height = innerHeight*0.6;
@@ -162,45 +192,70 @@ function spriteSetup() {
     wheelSprite.anchor.set(0.5);
     keepWheelSquare(wheelSprite);
     wheelSprite.position.set(0,(wheelSprite.width*0.125));
+    addWheelShadow(wheelSprite, wheelShadow);
 
     let wheelWidth = wheelSprite.width;
     let markerOffsetX = wheelWidth/2.8;
     let markerOffsetY = (wheelWidth/-2.8)+(wheelSprite.width*0.1);
     markerSprite.anchor.set(0.5);
     markerSprite.position.set(markerOffsetX, markerOffsetY)
-    markerSprite.width = wheelWidth*0.15;
     markerSprite.height = wheelWidth*0.3;
+    markerSprite.width = markerSprite.height*0.455;
     markerSprite.rotation = 0.75;
 
-    let buttonOffset = wheelWidth/-2.1;
+    let buttonOffset = wheelWidth/-2;
     buttonSprite.anchor.set(0.5);
     buttonSprite.position.set(0,buttonOffset)
     buttonSprite.width = wheelWidth*0.9;
-    buttonSprite.height = buttonSprite.width*0.2;
+    buttonSprite.height = buttonSprite.width*0.222;
 
     // Responsiveness
-    if (innerWidth > 1200 && innerHeight > 900) {
-        wheelSprite.position.set((-0.25*innerHeight),(wheelSprite.width*0.125));
+    if (innerWidth >= 1200 && innerHeight >= 900 && innerWidth > innerHeight) {
+        wheelSprite.position.set((-0.25*innerHeight),(wheelSprite.width*0.05));
         markerSprite.position.set(markerOffsetX-(0.25*innerHeight), markerOffsetY);
         buttonSprite.position.set((0.33*innerHeight),0);
+        addWheelShadow(wheelSprite, wheelShadow);
     }
 
-    if (innerWidth > 1600 && innerHeight > 900) {
-        keepWheelSquare(wheelSprite);
+    if (innerWidth >= 1600 && innerHeight >= 900 && innerWidth > innerHeight) {
+        keepWheelSquare(wheelSprite, wheelShadow);
         let xPos = -1.2*wheelSprite.width*0.5;
         let yPos = innerHeight*0;
         wheelSprite.position.set(xPos,yPos);
         markerSprite.position.set(markerOffsetX+(xPos), markerOffsetY-(wheelSprite.width*0.125));
         buttonSprite.position.set((0.33*innerHeight),0);
+        addWheelShadow(wheelSprite, wheelShadow);
     }
 
+    if (innerWidth > (innerHeight*1.75)) {
+        keepWheelSquare(wheelSprite, wheelShadow);
+        let xPos = -1.2*wheelSprite.width*0.5;
+        let yPos = innerHeight*0;
+        wheelSprite.position.set(xPos,yPos);
+        markerSprite.position.set(markerOffsetX+(xPos), markerOffsetY-(wheelSprite.width*0.125));
+        buttonSprite.position.set((0.33*innerHeight),0);
+        addWheelShadow(wheelSprite, wheelShadow);
+    }
+
+    if (innerHeight >= (innerWidth*1.75) && innerWidth < 500 && innerHeight >= (innerWidth*2)) {
+        buttonOffset = wheelWidth/-1.65;
+        buttonSprite.position.set(0,buttonOffset)
+    } else if (innerHeight > (innerWidth*1.75) && innerWidth < 500 && innerHeight < (innerWidth*2)) {
+        buttonOffset = wheelWidth/-2;
+        buttonSprite.position.set(0,buttonOffset)
+    }
+
+    addButtonShadow(buttonSprite, buttonShadow);
+
     // attach
+    spinnerBox.addChild(wheelShadow);
+    spinnerBox.addChild(buttonShadow);
     spinnerBox.addChild(wheelSprite);
     spinnerBox.addChild(markerSprite);
     spinnerBox.addChild(buttonSprite);
 
     headerAnimationBox.addChild(showdownOffSprite);
-    headerAnimationBox.addChild(mustDropSprite);
+
     headerAnimationBox.addChild(slotsSprite);
     headerAnimationBox.addChild(vegasSprite);
     headerAnimationBox.addChild(boltOffSprite);
@@ -216,12 +271,15 @@ function spriteSetup() {
     headerAnimationBox.addChild(w2LetSprite);
     headerAnimationBox.addChild(nLetSprite);
 
+    headerAnimationBox.addChild(mustDropSprite);
+
     headerBox.addChild(headerSprite);
     headerBox.addChild(headerAnimationBox);
     
     if (!first) {
         stage.removeChildren();
     }
+
     first = false;
 
     stage.addChild(headerBox);
@@ -248,7 +306,7 @@ function addInteractions(buttonObj, wheelObj) {
         } else if (stopping) {
             wheelObj.rotation += 0.02 * delta;
             checkData(wheelObj);
-        } else if (done || passedTwice) {
+        } else if (done) {
             wheelObj.rotation = wheelObj.rotation;
         }
     });
@@ -256,63 +314,67 @@ function addInteractions(buttonObj, wheelObj) {
 
 /* Get JSON Data */
 function setData(wheelObj) {
-    const url = "./src/data.json";
-    let req = new XMLHttpRequest();
-    req.overrideMimeType("application/json");
-    req.open('GET', url, true);
-    req.onload = function() {
-        let jsonResponse = JSON.parse(req.responseText);
-        positionData = jsonResponse.POSITION;
-        positionData = parseFloat(positionData, 2);
-        console.log(positionData);
-        handleData(positionData, wheelObj);
-    };
-    req.send(null);
+    function requestData(wheelObj) {
+        const url = "./src/data.json";
+        let req = new XMLHttpRequest();
+        req.overrideMimeType("application/json");
+        req.open('GET', url, true);
+        req.onload = function() {
+            let jsonResponse = JSON.parse(req.responseText);
+            positionData = jsonResponse.POSITION;
+            positionData = parseFloat(positionData, 2);
+            console.log(positionData);
+            handleData(positionData, wheelObj);
+        };
+        req.send(null);
+    }
+
+    function handleData(data, wheel) {
+        let positionRads;
+        let entryRads;
+        let altPositionRads;
+        let altEntryRads;
+        
+    
+        if (data == 1) {
+            positionRads = 1.75;
+            entryRads = 1.25;
+        } else if (data == 2) {
+            positionRads = 0.25;
+            entryRads = 0;
+            stradle = true;
+            altPositionRads = 2;
+            altEntryRads = 1.75;
+        } else if (data == 3) {
+            positionRads = 0.75;
+            entryRads = 0.25;
+        } else if (data == 4) {
+            positionRads = 1.25;
+            entryRads = 0.75;
+        } else {
+            return;
+        }
+        
+        let currentRot = wheel.rotation;
+        radHolder = Number((currentRot % 2).toFixed(2));
+        currentRads = parseFloat(radHolder,2);
+    
+        if ((spinning) && (currentRads <= positionRads) && (currentRads > entryRads)) {
+            spinning = false;
+            stopping = true;
+        } else if ((spinning) && (stradle) && (currentRads <= altPositionRads) && (currentRads >= altEntryRads)) {
+            spinning = false;
+            stopping = true;
+        } else {
+            checkData(wheel);
+        }
+    }
+
+    requestData(wheelObj);
 };
 
-function handleData(positionData, wheelObj) {
-    let positionRads;
-    let entryRads;
-    let altPositionRads;
-    let altEntryRads;
-    
-
-    if (positionData == 1) {
-        positionRads = 1.75;
-        entryRads = 1.25;
-    } else if (positionData == 2) {
-        positionRads = 0.25;
-        entryRads = 0;
-        stradle = true;
-        altPositionRads = 2;
-        altEntryRads = 1.75;
-    } else if (position == 3) {
-        positionRads = 0.75;
-        entryRads = 0.25;
-    } else if (position == 4) {
-        positionRads = 1.25;
-        entryRads = 0.75;
-    } else {
-        return;
-    }
-    
-    let currentRot = wheelObj.rotation;
-    radHolder = Number((currentRot % 2).toFixed(2));
-    currentRads = parseFloat(radHolder,2);
-
-    if ((spinning) && (currentRads <= positionRads) && (currentRads > entryRads)) {
-        spinning = false;
-        stopping = true;
-    } else if ((spinning) && (stradle) && (currentRads <= altPositionRads) && (currentRads >= altEntryRads)) {
-        spinning = false;
-        stopping = true;
-    } else {
-        checkData(wheelObj);
-    }
-}
-
-function checkData (wheelObj) {
-    radHolder = Number((wheelObj.rotation % 2).toFixed(2));
+function checkData (wheel) {
+    radHolder = Number((wheel.rotation % 2).toFixed(2));
     currentRads = parseFloat(radHolder);
 
     if (stopping && (currentRads <= positionRads) && (currentRads > entryRads)) {
@@ -323,11 +385,13 @@ function checkData (wheelObj) {
         done = true;
     } else {
         setTimeout(function(){
-            checkData(wheelObj);
+            checkData(wheel);
             clearTimeout();
         }, 500);
     }
 }
+
+
 
 function fillWindow() {
     innerWidth = window.innerWidth;
@@ -381,22 +445,57 @@ function keepWheelSquare(obj) {
     }
 }
 
+function addWheelShadow(wheel,shadow) {
+    let wheelWidth = wheel.width;
+    let wheelHeight = wheel.height;
+    let wheelX = wheel.position.x;
+    let wheelY = wheel.position.y;
+    let offsetX = innerHeight * 0.005;
+    let offsetY = innerHeight * 0.015;
+
+    shadow.width = wheelWidth * 1.1;
+    shadow.height = wheelHeight * 1.1;
+    shadow.anchor.set(0.5);
+    shadow.position.x = wheelX + offsetX;
+    shadow.position.y = wheelY + offsetY;
+}
+
+
+
+function addButtonShadow(button,shadow) {
+    let buttonWidth = button.width;
+    let buttonHeight = button.height;
+    let buttonX = button.position.x;
+    let buttonY = button.position.y;
+    let offsetX = innerHeight * 0.005;
+    let offsetY = innerHeight * 0.015;
+
+    shadow.anchor.set(0.5);
+    shadow.width = buttonWidth * 1;
+    shadow.height = buttonHeight * 1.2;
+    shadow.position.x = buttonX + offsetX;
+    shadow.position.y = buttonY + offsetY;
+}
+
 function keepLightsScaled(obj) {
-    let scaler = 0.5;
-    obj.position.set(0,0);
+    let scaler = 0.42;
     if (innerWidth < (innerHeight*0.75)) {
         obj.width = innerWidth*0.9;
         obj.height = (obj.width)*scaler;
+    } else if ((innerWidth < innerHeight) && (innerWidth > 620)) {
+        obj.width = innerWidth*0.75;
+        obj.height = (obj.width)*scaler;
     } else if (innerWidth < (innerHeight*1.5)) {
         obj.width = innerWidth*0.5;
-        obj.height = (obj.width)*0.5;
+        obj.height = (obj.width)*scaler;
     } else if (innerWidth > (innerHeight*2)) {
-        obj.height = innerHeight*0.35;
-        obj.width = obj.height*2;
+        obj.width = innerHeight*0.75;
+        obj.height = (obj.width)*scaler;
     } else {
-        obj.width = innerWidth*0.3;
-        obj.height = (obj.width)*0.5;
+        obj.width = innerWidth*0.4;
+        obj.height = (obj.width)*scaler;
     }
+
     obj.position.set(0,0);
 }
 
@@ -412,3 +511,19 @@ function alignToSign(obj, sign, xFactor, yFactor, baseFactor) {
         
     obj.position.set(xOffset, yOffset);
 }
+
+function hideThis(obj) {
+    obj.alpha = 1;
+}
+
+/* Handle Input */
+let touchType;
+if ('ontouchstart' in window) {
+    touchType = "touchstart";
+} else {
+    touchType = "click";
+}
+
+window.addEventListener('load', consolidatedScaler);
+window.addEventListener('orientationChange', consolidatedScaler);
+window.addEventListener('resize', consolidatedScaler);
