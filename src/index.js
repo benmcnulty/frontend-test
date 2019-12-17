@@ -7,6 +7,32 @@ let innerWidth = window.innerWidth;
 let innerHeight = window.innerHeight;
 
 let first = true;
+let spinRequested = false;
+let spinning = false;
+let stopping = false;
+let done = false;
+let positionData;
+let radHolder;
+let currentRads;
+let saltyPos;
+let saltyEntry;
+let altyPos;
+let altyEntry;
+let stradle = false;
+let passed = false;
+let passedTwice = false;
+
+/* Handle Input */
+let touchType;
+if ('ontouchstart' in window) {
+    touchType = "touchstart";
+} else {
+    touchType = "click";
+}
+
+window.addEventListener('DOMContentLoaded', consolidatedScaler);
+window.addEventListener('orientationChange', consolidatedScaler);
+window.addEventListener('resize', consolidatedScaler);
 
 const app = new PIXI.Application({
     view: viewerCanvas,
@@ -41,19 +67,14 @@ app.loader.add([
     {name: 'nLet', url: './src/images/n@2x.png'}
 ]).on("progress", loadProgressHandler).load(spriteSetup);
 
+function loadProgressHandler(loader, resource) {
+    console.log("file: " + resource.name);
+}
+
 const stage = new PIXI.Container();
 stage.width = app.renderer.width;
 stage.height = app.renderer.height;
 app.stage.addChild(stage);
-
-// const holder = app.stage.addChild(new PIXI.Container());
-// centerThis(holder);
-
-// const showdownContainer = new PIXI.Container();
-// centerThis(showdownContainer);
-
-// const backgroundContainer = new PIXI.Container();
-// centerThis(backgroundContainer);
 
 function spriteSetup() {
     // declare
@@ -142,14 +163,6 @@ function spriteSetup() {
     keepWheelSquare(wheelSprite);
     wheelSprite.position.set(0,(wheelSprite.width*0.125));
 
-    app.ticker.add((delta) => {
-        if (spinRequested || spinTime) {
-            wheelSprite.rotation += 0.02 * delta;
-        } else {
-            return;
-        }
-    });
-
     let wheelWidth = wheelSprite.width;
     let markerOffsetX = wheelWidth/2.8;
     let markerOffsetY = (wheelWidth/-2.8)+(wheelSprite.width*0.1);
@@ -159,23 +172,11 @@ function spriteSetup() {
     markerSprite.height = wheelWidth*0.3;
     markerSprite.rotation = 0.75;
 
-    
-
     let buttonOffset = wheelWidth/-2.1;
     buttonSprite.anchor.set(0.5);
     buttonSprite.position.set(0,buttonOffset)
     buttonSprite.width = wheelWidth*0.9;
     buttonSprite.height = buttonSprite.width*0.2;
-    buttonSprite.interactive = true;
-    buttonSprite.buttonMode = true;
-    buttonSprite.on(touchType, (event) => {
-        if (!spinRequested) {
-            spinRequested = true;
-            setData();
-        } else {
-            return;
-        }
-    });
 
     // Responsiveness
     if (innerWidth > 1200 && innerHeight > 900) {
@@ -225,6 +226,107 @@ function spriteSetup() {
 
     stage.addChild(headerBox);
     stage.addChild(spinnerBox);
+
+    addInteractions(buttonSprite, wheelSprite);
+}
+
+function addInteractions(buttonObj, wheelObj) {
+    buttonObj.interactive = true;
+    buttonObj.buttonMode = true;
+    buttonObj.on(touchType, () => {
+        if (!spinRequested) {
+            spinRequested = true;
+            spinning = true;
+            positionData = setData(wheelObj);
+        } else {
+            return;
+        }
+    });
+    app.ticker.add((delta) => {
+        if (spinning) {
+            wheelObj.rotation += 0.04 * delta;
+        } else if (stopping) {
+            wheelObj.rotation += 0.02 * delta;
+            checkData(wheelObj);
+        } else if (done || passedTwice) {
+            wheelObj.rotation = wheelObj.rotation;
+        }
+    });
+}
+
+/* Get JSON Data */
+function setData(wheelObj) {
+    const url = "./src/data.json";
+    let req = new XMLHttpRequest();
+    req.overrideMimeType("application/json");
+    req.open('GET', url, true);
+    req.onload = function() {
+        let jsonResponse = JSON.parse(req.responseText);
+        positionData = jsonResponse.POSITION;
+        positionData = parseFloat(positionData, 2);
+        console.log(positionData);
+        handleData(positionData, wheelObj);
+    };
+    req.send(null);
+};
+
+function handleData(positionData, wheelObj) {
+    let positionRads;
+    let entryRads;
+    let altPositionRads;
+    let altEntryRads;
+    
+
+    if (positionData == 1) {
+        positionRads = 1.75;
+        entryRads = 1.25;
+    } else if (positionData == 2) {
+        positionRads = 0.25;
+        entryRads = 0;
+        stradle = true;
+        altPositionRads = 2;
+        altEntryRads = 1.75;
+    } else if (position == 3) {
+        positionRads = 0.75;
+        entryRads = 0.25;
+    } else if (position == 4) {
+        positionRads = 1.25;
+        entryRads = 0.75;
+    } else {
+        return;
+    }
+    
+    let currentRot = wheelObj.rotation;
+    radHolder = Number((currentRot % 2).toFixed(2));
+    currentRads = parseFloat(radHolder,2);
+
+    if ((spinning) && (currentRads <= positionRads) && (currentRads > entryRads)) {
+        spinning = false;
+        stopping = true;
+    } else if ((spinning) && (stradle) && (currentRads <= altPositionRads) && (currentRads >= altEntryRads)) {
+        spinning = false;
+        stopping = true;
+    } else {
+        checkData(wheelObj);
+    }
+}
+
+function checkData (wheelObj) {
+    radHolder = Number((wheelObj.rotation % 2).toFixed(2));
+    currentRads = parseFloat(radHolder);
+
+    if (stopping && (currentRads <= positionRads) && (currentRads > entryRads)) {
+        done = true;
+    } else if ((stradle) && (stopping) && (currentRads <= positionRads) && (currentRads > entryRads)) {
+        done = true;
+    } else if ((stopping) && (stradle) && (currentRads <= altPositionRads) && (currentRads >= altEntryRads)) {
+        done = true;
+    } else {
+        setTimeout(function(){
+            checkData(wheelObj);
+            clearTimeout();
+        }, 500);
+    }
 }
 
 function fillWindow() {
@@ -309,54 +411,4 @@ function alignToSign(obj, sign, xFactor, yFactor, baseFactor) {
     let yOffset = sign.height * yFactor;
         
     obj.position.set(xOffset, yOffset);
-}
-
-function loadProgressHandler(loader, resource) {
-    console.log("file: " + resource.name);
-}
-
-window.addEventListener('DOMContentLoaded', consolidatedScaler);
-window.addEventListener('orientationChange', consolidatedScaler);
-window.addEventListener('resize', consolidatedScaler);
-
-/* Get JSON Data */
-let jsonResponse = {};
-let spinRequested = false;
-let spinTime = false;
-let result = false;
-
-function showData() {
-    if (!result) {
-        let spinfo = jsonResponse.POSITION;
-        console.warn(spinfo);
-        setTimeout(function(){ spinTime = false; }, 5000);
-    }
-};
-
-function setData() {
-    const url = "./src/data.json";
-    let req = new XMLHttpRequest();
-    req.overrideMimeType("application/json");
-    req.open('GET', url, true);
-    req.onload = function() {
-        jsonResponse = JSON.parse(req.responseText);
-        showData();
-        spinRequested = false;
-        spinTime = true;
-        console.warn("Spin done? " + !spinRequested);
-    };
-    req.send(null);
-    console.warn("Spin done? " + !spinRequested);
-};
-
-/* Handle Input */
-let touchType;
-let message = "no message";
-
-if ('ontouchstart' in window) {
-    touchType = "touchstart";
-    message = "touched";
-} else {
-    touchType = "click";
-    message = "clicked";
 }
