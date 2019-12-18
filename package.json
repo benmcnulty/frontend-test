@@ -1,6 +1,6 @@
 {
   "name": "frontend-test",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Frontend Game Developer test submission for Thunderbite",
   "main": "index.js",
   "scripts": {

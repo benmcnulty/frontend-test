@@ -256,14 +256,14 @@ function spriteSetup() {
     let markerOffsetX = wheelWidth/2.8;
     let markerOffsetY = (wheelWidth/-2.8)+(wheelSprite.width*0.1);
     markerSprite.anchor.set(0.5);
-    markerSprite.position.set(markerOffsetX, markerOffsetY)
+    markerSprite.position.set(markerOffsetX, markerOffsetY);
     markerSprite.height = wheelWidth*0.3;
     markerSprite.width = markerSprite.height*0.455;
     markerSprite.rotation = 0.75;
 
     let buttonOffset = wheelWidth/-2;
     buttonSprite.anchor.set(0.5);
-    buttonSprite.position.set(0,buttonOffset)
+    buttonSprite.position.set(0,buttonOffset);
     buttonSprite.width = wheelWidth*0.9;
     buttonSprite.height = buttonSprite.width*0.222;
 
@@ -297,10 +297,10 @@ function spriteSetup() {
 
     if (innerHeight >= (innerWidth*1.75) && innerWidth < 500 && innerHeight >= (innerWidth*2)) {
         buttonOffset = wheelWidth/-1.65;
-        buttonSprite.position.set(0,buttonOffset)
+        buttonSprite.position.set(0,buttonOffset);
     } else if (innerHeight > (innerWidth*1.75) && innerWidth < 500 && innerHeight < (innerWidth*2)) {
         buttonOffset = wheelWidth/-2;
-        buttonSprite.position.set(0,buttonOffset)
+        buttonSprite.position.set(0,buttonOffset);
     }
 
     addButtonShadow(buttonSprite, buttonShadow);
@@ -434,8 +434,8 @@ function addAnimations() {
             if (vegasLit === true && vegasSlotsAlpha <= 0) {
                 vegasLit = false;
                 if (vegasCount == 1) {
-                    vegasSpeed = (vegasSpeed * 2)
-                };
+                    vegasSpeed = (vegasSpeed * 2);
+                }
                 vegasCount = (vegasCount + 1);
             }
 
@@ -620,8 +620,8 @@ function addAnimations() {
             if (dropLit === true && dropAlpha <= 0) {
                 dropLit = false;
                 if (dropCount == 1) {
-                    dropSpeed = (dropSpeed * 2)
-                };
+                    dropSpeed = (dropSpeed * 2);
+                }
                 dropCount = (dropCount + 1);
             }
 
@@ -634,11 +634,11 @@ function addAnimations() {
 
         if (spinning) {
             data = (parseInt(wheelSprite.rotation, 10));
-            if ((targetPos == 2) && (data >= (12))) {
+            if ((targetPos == 1) && (data >= (12))) {
                 spinning = false;
                 passed = false;
                 stopping = true;
-            } else if ((targetPos == 1) && (data >= (14))) {
+            } else if ((targetPos == 2) && (data >= (14))) {
                 spinning = false;
                 passed = false;
                 stopping = true;
@@ -657,10 +657,10 @@ function addAnimations() {
 
         if (stopping) {
             data = parseInt(wheelSprite.rotation, 10);
-            if ((targetPos == 2) && data >= (31)) {
+            if ((targetPos == 1) && data >= (31)) {
                 stopping = false;
                 done = true;
-            } else if ((targetPos == 1) && data >= (27)) {
+            } else if ((targetPos == 2) && data >= (27)) {
                 stopping = false;
                 done = true;
             } else if ((targetPos == 3) && data >= (22)) {
@@ -767,7 +767,7 @@ function fillWindow() {
     app.view.width = innerWidth;
     app.view.height = innerHeight;
     app.renderer.resize(innerWidth, innerHeight);
-};
+}
 
 function consolidatedScaler () {
     fillWindow();
